@@ -1,0 +1,14 @@
+{
+  // Type checking only. Node runs the .ts files as they are by stripping the
+  // types, so nothing is emitted, only erasable syntax is allowed (no enums,
+  // namespaces or parameter properties), type-only imports say `import type`,
+  // and every relative import names its .ts file.
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true
+  }
+}

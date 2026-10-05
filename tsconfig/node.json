@@ -1,0 +1,11 @@
+{
+  // A server or script that Node runs directly.
+  "extends": "./base.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "lib": ["esnext"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"]
+  }
+}

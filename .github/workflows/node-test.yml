@@ -1,0 +1,34 @@
+# The test job every Node repo runs: `npm ci`, then `npm test`. A repo calls it
+# from its own workflow, pinned to a commit of this repo:
+#
+#   jobs:
+#     test:
+#       uses: jeroenwijnen98/standards/.github/workflows/node-test.yml@<sha>
+#       with:
+#         node-version: 26
+name: node-test
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        type: string
+        default: "26"
+      apt-packages:
+        description: Space-separated packages to apt-get install before npm ci.
+        type: string
+        default: ""
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+      - if: inputs.apt-packages != ''
+        run: sudo apt-get update && sudo apt-get install -y ${{ inputs.apt-packages }}
+      - run: npm ci
+      - run: npm test

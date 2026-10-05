@@ -1,0 +1,11 @@
+{
+  // A browser app built by a bundler (esbuild), whose tests Node runs directly.
+  "extends": "./base.json",
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node"]
+  }
+}
