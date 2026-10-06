@@ -40,7 +40,7 @@ test("dist/anti-slop is the current build of oxlint/anti-slop", () => {
   const committed = join(root, "dist/anti-slop");
   const files = (dir: string) =>
     readdirSync(dir, { recursive: true, withFileTypes: true })
-      .filter((entry) => entry.isFile())
+      .filter((entry) => entry.isFile() && entry.name !== ".DS_Store")
       .map((entry) => join(entry.parentPath, entry.name).slice(dir.length))
       .sort();
   assert.deepEqual(files(committed), files(fresh), "run `npm run build`");
