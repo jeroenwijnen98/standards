@@ -50,6 +50,10 @@ versions in this `package.json`'s `peerDependencies`.
 }
 ```
 
+Every `node --test` script passes `--test-timeout=300000`, so a test that
+leaks a server or timer fails after 5 minutes instead of hanging the run.
+`npm run status` lists the scripts that don't.
+
 `.github/workflows/test.yml`, pinned to a commit (GitHub's advice; a tag can move):
 
 ```yaml
@@ -63,7 +67,7 @@ jobs:
 
 1. Change it here, `npm test`, commit, tag the next version (`git tag v0.2.0`), push with tags.
 2. Bump one repo (`npm i -D github:jeroenwijnen98/standards#v0.2.0`), fix what breaks, then the rest.
-3. `npm run status` lists the version each repo in `~/Developer` is on.
+3. `npm run status` lists the version each repo in `~/Developer` is on, and any `node --test` script missing `--test-timeout`.
 
 A rule belongs here when every repo should have it. A rule for one repo, or one
 stack, stays in that repo's config.

@@ -1,6 +1,8 @@
 // Which version of the standards each repo in ~/Developer is on: the ref its
 // package.json asks for and the commit its lockfile resolved, next to the
-// newest tag here. Usage: npm run status
+// newest tag here, and any `node --test` script without --test-timeout (a
+// test that leaks a handle then hangs the run instead of failing).
+// Usage: npm run status
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -17,10 +19,14 @@ console.log(`latest: ${latest} (${git("rev-parse", "--short", `${latest}^{commit
 for (const repo of readdirSync(developer).sort()) {
   const manifest = join(developer, repo, "package.json");
   if (!existsSync(manifest)) continue;
-  const { dependencies = {}, devDependencies = {} } = JSON.parse(readFileSync(manifest, "utf8"));
+  const { dependencies = {}, devDependencies = {}, scripts = {} } = JSON.parse(readFileSync(manifest, "utf8"));
+  const untimed = Object.entries(scripts as Record<string, string>)
+    .filter(([, cmd]) => cmd.includes("node --test") && !cmd.includes("--watch") && !cmd.includes("--test-timeout"))
+    .map(([script]) => script);
+  const warning = untimed.length > 0 ? `  no --test-timeout: ${untimed.join(", ")}` : "";
   const spec: string | undefined = devDependencies[name] ?? dependencies[name];
   if (spec === undefined) {
-    console.log(`${repo.padEnd(20)} -`);
+    console.log(`${repo.padEnd(20)} -${warning}`);
     continue;
   }
   const lockfile = join(developer, repo, "package-lock.json");
@@ -28,5 +34,5 @@ for (const repo of readdirSync(developer).sort()) {
     ? (JSON.parse(readFileSync(lockfile, "utf8")).packages?.[`node_modules/${name}`]?.resolved ?? "")
     : "";
   const commit = resolved.split("#")[1]?.slice(0, 7) ?? "not installed";
-  console.log(`${repo.padEnd(20)} ${spec.split("#")[1] ?? spec}  ${commit}`);
+  console.log(`${repo.padEnd(20)} ${spec.split("#")[1] ?? spec}  ${commit}${warning}`);
 }
