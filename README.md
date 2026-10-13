@@ -6,7 +6,7 @@ and adds its own rules on top. A rule added here reaches a repo when it bumps
 the tag.
 
 ```
-npm i -D github:jeroenwijnen98/standards#v0.1.0
+npm i -D github:jeroenwijnen98/standards#v0.2.0
 ```
 
 ## What's here
@@ -16,6 +16,7 @@ npm i -D github:jeroenwijnen98/standards#v0.1.0
 | `oxlint/base.js` | Base oxlint config: rules plus the anti-slop plugin. `ignorePatterns` is a separate export, because `extends` does not carry it. |
 | `oxlint/anti-slop/` | Vendored [anti-slop](https://github.com/dmmulroy/anti-slop) source, see `UPSTREAM.md`. |
 | `dist/anti-slop/` | The same plugin with its types stripped (`npm run build`). Node won't strip types under `node_modules`, so this is what repos load. Committed; `npm test` fails when stale. |
+| `comment-width/` | The `comment-width` command: comments that wrap stay within 80 columns, a one-line comment within a width the repo picks. oxlint has no comments-only max-len. |
 | `tsconfig/base.json` | strict, noEmit, and the flags for Node's type stripping: `erasableSyntaxOnly`, `verbatimModuleSyntax`, `allowImportingTsExtensions`. |
 | `tsconfig/node.json` | base + `nodenext`, for a server or script Node runs directly. |
 | `tsconfig/bundler.json` | base + `bundler` resolution and the DOM, for an esbuild-built browser app. |
@@ -40,6 +41,16 @@ export default defineConfig({
 
 The repo also needs `oxlint` and `@oxlint/plugins` as dev dependencies, at the
 versions in this `package.json`'s `peerDependencies`.
+
+`package.json`'s lint script runs `comment-width` beside oxlint. It checks the
+TS, JS, CSS, HTML, SQL and tsconfig files git knows about, skipping the
+`ignorePatterns` folders:
+
+```json
+"lint": "oxlint --deny-warnings && comment-width --one-line 100 --skip test/fixtures/"
+```
+
+`--one-line` defaults to 80; `--skip` takes a folder not written here.
 
 `tsconfig.json`:
 
