@@ -6,7 +6,7 @@ and adds its own rules on top. A rule added here reaches a repo when it bumps
 the tag.
 
 ```
-npm i -D github:jeroenwijnen98/standards#v0.4.1
+npm i -D github:jeroenwijnen98/standards#v0.4.2
 ```
 
 ## What's here
