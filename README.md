@@ -6,7 +6,7 @@ and adds its own rules on top. A rule added here reaches a repo when it bumps
 the tag.
 
 ```
-npm i -D github:jeroenwijnen98/standards#v0.2.0
+npm i -D github:jeroenwijnen98/standards#v0.3.0
 ```
 
 ## What's here
@@ -77,7 +77,7 @@ jobs:
 ## Changing a rule
 
 1. Change it here, `npm test`, commit, tag the next version (`git tag v0.2.0`), push with tags.
-2. Bump one repo (`npm i -D github:jeroenwijnen98/standards#v0.2.0`), fix what breaks, then the rest.
+2. Bump one repo (`npm i -D github:jeroenwijnen98/standards#v0.3.0`), fix what breaks, then the rest.
 3. `npm run status` lists the version each repo in `~/Developer` is on, and any `node --test` script missing `--test-timeout`.
 
 A rule belongs here when every repo should have it. A rule for one repo, or one

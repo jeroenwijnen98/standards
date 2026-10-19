@@ -25,6 +25,12 @@ export default {
   ],
   rules: {
     "no-nested-ternary": "error",
+    "no-shadow": "error",
+    "typescript/no-non-null-assertion": "error",
+    // tsconfig's verbatimModuleSyntax already makes a type-only import say
+    // `import type`; this catches `import { type A }`, which it leaves behind
+    // as a side-effect import.
+    "typescript/no-import-type-side-effects": "error",
     "no-unused-vars": ["warn", { ignoreRestSiblings: true }],
     "oxc/no-accumulating-spread": "error",
     "anti-slop/no-reduce-accumulator-copy": "error",

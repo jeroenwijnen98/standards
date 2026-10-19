@@ -1,4 +1,5 @@
 // One violation per rule of the base config.
+import { type Shape } from "./shape.ts";
 export const nested = (a: number) => (a > 1 ? (a > 2 ? 1 : 2) : 3);
 export const spread = (xs: number[]) => xs.reduce((acc, x) => ({ ...acc, [x]: x }), {});
 export const copied = (xs: number[]) => xs.reduce((acc, x) => acc.concat(x), [] as number[]);
@@ -11,3 +12,8 @@ export function widened() {
 export function unused() {
   const never = 1;
 }
+export function shadowed(xs: number[]) {
+  return xs.map((xs) => xs);
+}
+export const asserted = (v: string | undefined) => v!.length;
+export const shape: Shape = { id: "a" };

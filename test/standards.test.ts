@@ -16,6 +16,9 @@ test("the base oxlint config reports every rule it enables", () => {
   );
   for (const code of [
     "eslint(no-nested-ternary)",
+    "eslint(no-shadow)",
+    "typescript(no-non-null-assertion)",
+    "typescript(no-import-type-side-effects)",
     "eslint(no-unused-vars)",
     "oxc(no-accumulating-spread)",
     "anti-slop(no-reduce-accumulator-copy)",
