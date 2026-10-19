@@ -118,7 +118,9 @@ export default {
 ```
 
 The repo needs `@ai-hero/sandcastle` and `zod` as dependencies, and
-`"sandcastle": "npx tsx .sandcastle/main.mts"` in its scripts.
+`"sandcastle": "npx tsx .sandcastle/main.mts"` in its scripts. A CommonJS repo also
+needs `.sandcastle/package.json` with `{"type": "module"}`, or the runner gets
+`{ default: config }`.
 
 `npx sandcastle-setup sync` writes `Dockerfile` and `.env.example` from
 `config.ts` and adds missing `.gitignore` lines; commit them, since
