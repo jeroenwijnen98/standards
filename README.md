@@ -17,6 +17,7 @@ npm i -D github:jeroenwijnen98/standards#v0.4.1
 | `oxlint/anti-slop/` | Vendored [anti-slop](https://github.com/dmmulroy/anti-slop) source, see `UPSTREAM.md`. |
 | `dist/anti-slop/` | The same plugin with its types stripped (`npm run build`). Node won't strip types under `node_modules`, so this is what repos load. Committed; `npm test` fails when stale. |
 | `comment-width/` | The `comment-width` command: comments that wrap stay within 80 columns, a one-line comment within a width the repo picks. oxlint has no comments-only max-len. |
+| `flake-check/` | The `flake-check` command: the real waits (`setTimeout` with a delay) and real-clock readings (`Date.now()`, `performance.now()`, `new Date()`) a branch adds to its tests. The Sandcastle reviewer runs it; it reads only added lines, so the repos' existing waits don't block anything. |
 | `hooks/checked-tree` | The `checked-tree` command: stamps the tree a full check passed on, so the pre-commit hook skips re-running it there. Hands the check no `GIT_*`. |
 | `tsconfig/base.json` | strict, noEmit, and the flags for Node's type stripping: `erasableSyntaxOnly`, `verbatimModuleSyntax`, `allowImportingTsExtensions`. |
 | `tsconfig/node.json` | base + `nodenext`, for a server or script Node runs directly. |

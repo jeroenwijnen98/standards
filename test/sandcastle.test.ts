@@ -49,9 +49,12 @@ test("the prompts carry the project's sections, check rules and reinstall step",
   assert.match(implement, /Never call the live API\./);
   assert.match(implement, /`npm test` must pass\./);
   assert.match(implement, /never start a test run while another/);
+  assert.match(implement, /titled `Flaky: <test name>`/);
   assert.doesNotMatch(implement, /<!--/);
 
-  assert.match(composePrompt("review", config, project), /^ {3}- Does every API call go through/m);
+  const review = composePrompt("review", config, project);
+  assert.match(review, /^ {3}- Does every API call go through/m);
+  assert.match(review, /npx flake-check \{\{TARGET_BRANCH\}\}/);
   const merge = composePrompt("merge", config, project);
   assert.match(merge, /touched `requirements.txt`, run `pip install --user -r requirements.txt`/);
   assert.match(merge, /touched `package-lock.json`, run `npm ci/);

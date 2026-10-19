@@ -32,6 +32,7 @@
   "bin": {
     "comment-width": "comment-width/cli.js",
     "checked-tree": "hooks/checked-tree",
+    "flake-check": "flake-check/cli.js",
     "sandcastle-setup": "sandcastle/cli.js"
   },
   "peerDependenciesMeta": {

@@ -30,6 +30,10 @@ Review the code changes on branch `{{BRANCH}}` and improve code clarity, consist
    - Are there unsafe casts, `any` types, or unchecked assumptions?
    - Does the code use `GLOSSARY.md`'s terms, not the synonyms it says to avoid?
    - Does the change introduce injection vulnerabilities, credential leaks, or other security issues?
+   - Does `npx flake-check {{TARGET_BRANCH}}` print nothing? Each line is a test this branch
+     made wait on real time. Rewrite it with `mock.timers`, an injected clock, or an await on
+     the event itself. A real wait stays only where no fake clock reaches (a child process,
+     a browser), with its reason after `--` in the disable comment.
 <!-- project: Review -->
 
 4. **Maintain balance**: Avoid over-simplification that could:

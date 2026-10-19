@@ -62,7 +62,14 @@ export function parseProject(text) {
 
 const CHECK_RULES = `Run every check in the foreground, and never start a test run while another is still
 running. Save a full run's output (\`2>&1 | tee /tmp/<name>.log\`) and read that file again
-instead of rerunning the suite.`;
+instead of rerunning the suite.
+
+A test that fails and then passes with nothing changed in between is a flake. Record it
+before you commit: find it with \`gh issue list --state open --search "Flaky in:title"\` and
+comment on that issue, or open one titled \`Flaky: <test name>\`, labelled \`bug\` and
+\`needs-triage\`, with the error line, how many runs failed and this branch. Notes and
+commit messages name the flake by its issue number. A failure is pre-existing once you have
+seen it fail on the commit this branch started from. Every commit goes through the hooks.`;
 
 /**
  * Step 3 of the merge: the sandbox installed its dependencies before the
