@@ -130,7 +130,7 @@ check` exits 1 when they are stale, the runner warns, and `npm run status` lists
 it. `sandcastle-setup prompts <dir>` writes the composed prompts to read them;
 each run also leaves them in `.sandcastle/logs/prompts/`.
 
-The `sandcastle-init` skill in claude-setup sets a repo up, or moves an old
+The `sandcastle-setup` skill in claude-setup (which drives this command) sets a repo up, or moves an old
 copied setup onto this one.
 
 ## Changing a rule
