@@ -6,7 +6,7 @@ and adds its own rules on top. A rule added here reaches a repo when it bumps
 the tag.
 
 ```
-npm i -D github:jeroenwijnen98/standards#v0.2.0
+npm i -D github:jeroenwijnen98/standards#v0.2.1
 ```
 
 ## What's here
@@ -17,6 +17,7 @@ npm i -D github:jeroenwijnen98/standards#v0.2.0
 | `oxlint/anti-slop/` | Vendored [anti-slop](https://github.com/dmmulroy/anti-slop) source, see `UPSTREAM.md`. |
 | `dist/anti-slop/` | The same plugin with its types stripped (`npm run build`). Node won't strip types under `node_modules`, so this is what repos load. Committed; `npm test` fails when stale. |
 | `comment-width/` | The `comment-width` command: comments that wrap stay within 80 columns, a one-line comment within a width the repo picks. oxlint has no comments-only max-len. |
+| `hooks/checked-tree` | The `checked-tree` command: stamps the tree a full check passed on, so the pre-commit hook skips re-running it there. Hands the check no `GIT_*`. |
 | `tsconfig/base.json` | strict, noEmit, and the flags for Node's type stripping: `erasableSyntaxOnly`, `verbatimModuleSyntax`, `allowImportingTsExtensions`. |
 | `tsconfig/node.json` | base + `nodenext`, for a server or script Node runs directly. |
 | `tsconfig/bundler.json` | base + `bundler` resolution and the DOM, for an esbuild-built browser app. |
@@ -51,6 +52,18 @@ TS, JS, CSS, HTML, SQL and tsconfig files git knows about, skipping the
 ```
 
 `--one-line` defaults to 80; `--skip` takes a folder not written here.
+
+The pre-commit hook and the test script go through `checked-tree`:
+
+```sh
+# .githooks/pre-commit
+cd "$(git rev-parse --show-toplevel)" || exit 1
+exec node_modules/.bin/checked-tree hook npm test --silent
+```
+
+```json
+"test": "checked-tree run npm run --silent check"
+```
 
 `tsconfig.json`:
 
