@@ -1,6 +1,6 @@
 {
   "name": "@jeroenwijnen98/standards",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "exports": {
@@ -24,6 +24,7 @@
     "typescript": "^7.0.2"
   },
   "bin": {
-    "comment-width": "comment-width/cli.js"
+    "comment-width": "comment-width/cli.js",
+    "checked-tree": "hooks/checked-tree"
   }
 }
