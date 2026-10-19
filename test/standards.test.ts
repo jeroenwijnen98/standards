@@ -29,6 +29,15 @@ test("the base oxlint config reports every rule it enables", () => {
   }
 });
 
+test("the base oxlint config allows non-null assertions in test files", () => {
+  const fixture = join(root, "test/fixtures/lint");
+  const run = spawnSync(bin("oxlint"), ["--format", "json"], { cwd: fixture, encoding: "utf8" });
+  const flagged = JSON.parse(run.stdout)
+    .diagnostics.filter((d: { code: string }) => d.code === "typescript(no-non-null-assertion)")
+    .map((d: { filename: string }) => d.filename);
+  assert.deepEqual(flagged, ["violations.ts"]);
+});
+
 test("the base tsconfig rejects syntax Node cannot strip", () => {
   const run = spawnSync(bin("tsc"), ["-p", join(root, "test/fixtures/erasable")], {
     encoding: "utf8",

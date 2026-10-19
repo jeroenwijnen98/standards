@@ -37,4 +37,12 @@ export default {
     "anti-slop/no-chained-type-assertions": "error",
     "anti-slop/no-widen-then-assert": "error",
   },
+  overrides: [
+    {
+      // A test asserting on a value it just built gains nothing from a
+      // narrowing check; a wrong `!` fails the test right there.
+      files: ["**/*.test.ts", "**/*.test.tsx", "**/test/**", "**/tests/**"],
+      rules: { "typescript/no-non-null-assertion": "off" },
+    },
+  ],
 };
