@@ -22,6 +22,7 @@ npm i -D github:jeroenwijnen98/standards#v0.3.1
 | `tsconfig/node.json` | base + `nodenext`, for a server or script Node runs directly. |
 | `tsconfig/bundler.json` | base + `bundler` resolution and the DOM, for an esbuild-built browser app. |
 | `.github/workflows/node-test.yml` | Reusable CI job: `npm ci`, `npm test`. |
+| `sandcastle/` | The Sandcastle loop every repo runs (plan → implement + review → merge), its prompt templates, and the `sandcastle-setup` command that writes a repo's Dockerfile. See below. |
 
 ## Using it in a repo
 
@@ -86,6 +87,49 @@ jobs:
   test:
     uses: jeroenwijnen98/standards/.github/workflows/node-test.yml@<commit>
 ```
+
+## Sandcastle
+
+A repo's `.sandcastle/` holds three hand-written files; everything else comes
+from here, so a fix to the loop or a prompt reaches every repo on its next bump.
+
+| File | What |
+|---|---|
+| `main.mts` | `await runSandcastle(config)`. The nightly run finds repos by this file. |
+| `config.ts` | The image (Node version, Python, apt packages, Playwright, raw Dockerfile lines) and the install commands, typed by `SandcastleConfig`. |
+| `project.md` | What only this repo's prompts say, as `## ` sections: `Context`, `Execution`, `Checks` (required), `Review`, `Host only`. |
+
+```ts
+// .sandcastle/main.mts
+import { runSandcastle } from "@jeroenwijnen98/standards/sandcastle";
+import config from "./config.ts";
+
+await runSandcastle(config);
+```
+
+```ts
+// .sandcastle/config.ts
+import type { SandcastleConfig } from "@jeroenwijnen98/standards/sandcastle";
+
+export default {
+  image: { node: "26" },
+  install: [{ command: "npm ci --no-audit --no-fund", when: ["package.json", "package-lock.json"] }],
+} satisfies SandcastleConfig;
+```
+
+The repo needs `@ai-hero/sandcastle` and `zod` as dependencies, and
+`"sandcastle": "npx tsx .sandcastle/main.mts"` in its scripts.
+
+`npx sandcastle-setup sync` writes `Dockerfile` and `.env.example` from
+`config.ts` and adds missing `.gitignore` lines; commit them, since
+`sandcastle docker build-image` and the nightly run read them from disk. Run it
+after changing `config.ts` and after bumping this package. `sandcastle-setup
+check` exits 1 when they are stale, the runner warns, and `npm run status` lists
+it. `sandcastle-setup prompts <dir>` writes the composed prompts to read them;
+each run also leaves them in `.sandcastle/logs/prompts/`.
+
+The `sandcastle-init` skill in claude-setup sets a repo up, or moves an old
+copied setup onto this one.
 
 ## Changing a rule
 

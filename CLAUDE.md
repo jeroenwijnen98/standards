@@ -4,6 +4,7 @@ Shared oxlint and tsconfig bases for the TypeScript repos in `~/Developer`. See 
 
 - Edit anti-slop in `oxlint/anti-slop/`, never in `dist/`; run `npm run build` after, and commit both.
 - Every rule in `oxlint/base.js` has a violation in `test/fixtures/lint/violations.ts` that `npm test` asserts on. Add one with the rule.
+- `sandcastle/prompts/` are the prompts of every repo's Sandcastle agents; a repo adds only the `project.md` sections. Read a composed one with `sandcastle-setup prompts <dir>` before changing a template.
 - A change here reaches no repo until it is tagged and the repo bumps its dependency. Breaking changes (a new error-level rule) get a minor version bump while below 1.0.
 
 ## Agent skills

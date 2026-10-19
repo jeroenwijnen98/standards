@@ -1,15 +1,21 @@
 {
   "name": "@jeroenwijnen98/standards",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "exports": {
     "./oxlint": "./oxlint/base.js",
-    "./tsconfig/*": "./tsconfig/*"
+    "./tsconfig/*": "./tsconfig/*",
+    "./sandcastle": {
+      "types": "./sandcastle/index.d.ts",
+      "default": "./sandcastle/index.js"
+    }
   },
   "peerDependencies": {
     "@oxlint/plugins": "1.86.0",
-    "oxlint": "1.86.0"
+    "oxlint": "1.86.0",
+    "@ai-hero/sandcastle": "^0.12.0",
+    "zod": "^4.5.4"
   },
   "scripts": {
     "build": "node scripts/build.ts",
@@ -25,6 +31,21 @@
   },
   "bin": {
     "comment-width": "comment-width/cli.js",
-    "checked-tree": "hooks/checked-tree"
+    "checked-tree": "hooks/checked-tree",
+    "sandcastle-setup": "sandcastle/cli.js"
+  },
+  "peerDependenciesMeta": {
+    "@oxlint/plugins": {
+      "optional": true
+    },
+    "oxlint": {
+      "optional": true
+    },
+    "@ai-hero/sandcastle": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
   }
 }
