@@ -7,15 +7,17 @@
 //              graph and outputs a <plan> of the unblocked ones, each with a
 //              deterministic branch name.
 //   Implement: per issue, a sandbox on that branch. The implementer runs
-//              (up to 100 iterations); if it committed, a reviewer runs in the
-//              same sandbox. maxParallel issues at a time.
-//   Merge:     one agent merges every branch with commits into the current
-//              branch and closes the issues.
+//              (up to 100 iterations); if it committed, or the branch still
+//              holds unmerged commits from an earlier run, a reviewer runs in
+//              the same sandbox. maxParallel issues at a time.
+//   Merge:     one agent merges every such branch into the current branch
+//              and closes the issues.
 
 import * as sandcastle from "@ai-hero/sandcastle";
 import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 import { z } from "zod";
 import { staleFiles, withDefaults, writePrompts } from "./compose.js";
+import { commitsAhead } from "./git.js";
 
 const planSchema = z.object({
   issues: z.array(z.object({ id: z.string(), title: z.string(), branch: z.string() })),
@@ -132,7 +134,13 @@ export async function runSandcastle(input) {
           promptFile: prompts.implement,
           promptArgs: { TASK_ID: issue.id, ISSUE_TITLE: issue.title, BRANCH: issue.branch },
         });
-        if (implement.commits.length === 0) return implement;
+        // A branch can hold finished work from an earlier run whose merge never
+        // happened (a spend limit, a crash). The implementer then finds nothing
+        // to do and commits nothing; without this the branch is skipped every
+        // run while its issue stays open.
+        const stranded = implement.commits.length === 0 && commitsAhead(repo, issue.branch) > 0;
+        if (implement.commits.length === 0 && !stranded) return implement;
+        if (stranded) console.log(`  ${issue.id}: ${issue.branch} has unmerged commits from an earlier run`);
 
         const review = await finished(
           await sandbox.run({
@@ -145,7 +153,7 @@ export async function runSandcastle(input) {
           `${issue.id} reviewer`,
         );
         // Each sandbox.run() returns only its own commits.
-        return { ...review, commits: [...implement.commits, ...review.commits] };
+        return { ...review, commits: [...implement.commits, ...review.commits], stranded };
       } finally {
         await sandbox.close();
       }
@@ -159,7 +167,7 @@ export async function runSandcastle(input) {
 
     const completed = issues.filter((_, i) => {
       const outcome = settled[i];
-      return outcome.status === "fulfilled" && outcome.value.commits.length > 0;
+      return outcome.status === "fulfilled" && (outcome.value.commits.length > 0 || outcome.value.stranded);
     });
     console.log(`\nExecution complete. ${completed.length} branch(es) with commits:`);
     for (const issue of completed) console.log(`  ${issue.branch}`);

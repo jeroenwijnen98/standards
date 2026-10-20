@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { composePrompt, loadConfig, parseProject, renderDockerfile } from "../sandcastle/compose.js";
+import { commitsAhead } from "../sandcastle/git.js";
 
 const root = join(import.meta.dirname, "..");
 const cli = join(root, "sandcastle/cli.js");
@@ -63,4 +64,29 @@ test("the prompts carry the project's sections, check rules and reinstall step",
 test("project.md must have Checks and no unknown section", () => {
   assert.throws(() => parseProject("## Context\n\nx\n"), /Checks section is required/);
   assert.throws(() => parseProject("## Checks\n\nx\n\n## Contxt\n\ny\n"), /unknown section "## Contxt"/);
+});
+
+test("commitsAhead counts a branch's commits the current branch lacks by patch, 0 without the branch", () => {
+  const repo = mkdtempSync(join(tmpdir(), "standards-ahead-"));
+  const git = (...args: string[]) => {
+    const out = spawnSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", ...args], { cwd: repo, encoding: "utf8" });
+    assert.equal(out.status, 0, out.stderr);
+  };
+  git("init", "-q", "-b", "main");
+  git("commit", "-q", "--allow-empty", "-m", "base");
+  git("checkout", "-q", "-b", "sandcastle/issue-1");
+  git("commit", "-q", "--allow-empty", "-m", "work");
+  git("commit", "-q", "--allow-empty", "-m", "refine");
+  git("checkout", "-q", "main");
+
+  assert.equal(commitsAhead(repo, "sandcastle/issue-1"), 2);
+  assert.equal(commitsAhead(repo, "sandcastle/issue-2"), 0);
+
+  git("checkout", "-q", "-b", "sandcastle/issue-3");
+  writeFileSync(join(repo, "a"), "a\n");
+  git("add", "a");
+  git("commit", "-q", "-m", "picked");
+  git("checkout", "-q", "main");
+  git("cherry-pick", "sandcastle/issue-3");
+  assert.equal(commitsAhead(repo, "sandcastle/issue-3"), 0);
 });
