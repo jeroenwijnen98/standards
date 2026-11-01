@@ -146,7 +146,13 @@ stack, stays in that repo's config.
 
 ## Updating anti-slop
 
-Run the `install-anti-slop` skill against `oxlint/anti-slop/` in this repo, then
-`npm run build`.
+The vendored copy has no local changes (see `oxlint/anti-slop/UPSTREAM.md`), so
+an update is a copy:
+
+1. Clone [anti-slop](https://github.com/dmmulroy/anti-slop) and copy its `src/`
+   over `oxlint/anti-slop/`, skipping the `*.test.ts` files. Keep `UPSTREAM.md`
+   and set its commit to the one copied.
+2. Check the rules `oxlint/base.js` turns on still exist under the same names.
+3. `npm run build && npm test`, commit both folders, tag the next version.
 
 After cloning: `npm install && npm run hooks` (pre-commit runs `npm test`).
