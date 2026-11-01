@@ -1,8 +1,8 @@
 // What a repo's Sandcastle setup is made of, from its two hand-written files:
 // `.sandcastle/config.ts` (image, install commands, limits) and
 // `.sandcastle/project.md` (the parts of the prompts only that repo knows).
-// The prompts are composed at run time; the Dockerfile, .env.example and
-// .gitignore are written by `sandcastle-setup sync`, because
+// The prompts are composed at run time; the Dockerfile, .env.example,
+// package.json and .gitignore are written by `sandcastle-setup sync`, because
 // `sandcastle docker build-image` and the nightly run read them from disk.
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -27,6 +27,12 @@ export async function loadConfig(repo) {
 
 /** @param {import("./index.d.ts").SandcastleConfig} config */
 export function withDefaults(config) {
+  if (config && "default" in config && !("image" in config)) {
+    throw new Error(
+      ".sandcastle/config.ts was loaded as CommonJS, so main.mts got { default: config }: " +
+        "run `npx sandcastle-setup sync`, which writes .sandcastle/package.json with \"type\": \"module\"",
+    );
+  }
   if (!config?.image?.node) throw new Error(".sandcastle/config.ts: image.node is required");
   if (!Array.isArray(config.install)) {
     throw new Error(".sandcastle/config.ts: install is required ([] for none)");
@@ -225,6 +231,15 @@ export function renderDockerfile(config) {
 
 export const ENV_EXAMPLE = readFileSync(join(here, "files/env.example"), "utf8");
 
+/**
+ * .sandcastle/package.json. `npm run sandcastle` runs main.mts with tsx, which
+ * loads config.ts as CommonJS under a package.json without "type": "module";
+ * main.mts then imports { default: config }. This makes .sandcastle/ ESM
+ * without touching the repo's own package.json, which an Electron app or
+ * other CommonJS build may need as it is.
+ */
+export const PACKAGE_JSON = `${JSON.stringify({ type: "module" }, null, 2)}\n`;
+
 /** Lines .sandcastle/.gitignore must have; the repo may add its own. */
 export const IGNORED = [".env", "logs/", "worktrees/"];
 
@@ -241,6 +256,7 @@ export async function staleFiles(repo) {
   const stale = [];
   if (read("Dockerfile") !== renderDockerfile(config)) stale.push("Dockerfile");
   if (read(".env.example") !== ENV_EXAMPLE) stale.push(".env.example");
+  if (read("package.json") !== PACKAGE_JSON) stale.push("package.json");
   const ignored = (read(".gitignore") ?? "").split("\n").map((line) => line.trim());
   if (!IGNORED.every((line) => ignored.includes(line))) stale.push(".gitignore");
   parseProject(read("project.md") ?? "");

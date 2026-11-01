@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { composePrompt, loadConfig, parseProject, renderDockerfile } from "../sandcastle/compose.js";
+import { composePrompt, loadConfig, parseProject, renderDockerfile, withDefaults } from "../sandcastle/compose.js";
 import { commitsAhead } from "../sandcastle/git.js";
 
 const root = join(import.meta.dirname, "..");
@@ -30,6 +30,26 @@ test("sync writes the generated files, and check passes until one drifts", () =>
   const stale = setup(repo, "check");
   assert.equal(stale.status, 1);
   assert.match(stale.stderr, /Dockerfile/);
+});
+
+test("sync makes .sandcastle/ an ES module scope, whatever the repo's package.json says", () => {
+  // tsx loads a .ts file under a package.json without "type": "module" as
+  // CommonJS, and main.mts then imports { default: config }.
+  const repo = fixture();
+  assert.equal(setup(repo, "sync").status, 0);
+  assert.deepEqual(JSON.parse(readFileSync(join(repo, ".sandcastle/package.json"), "utf8")), { type: "module" });
+
+  writeFileSync(join(repo, ".sandcastle/package.json"), "{}\n");
+  const stale = setup(repo, "check");
+  assert.equal(stale.status, 1);
+  assert.match(stale.stderr, /package\.json/);
+});
+
+test("a config that arrives as { default } names the CommonJS load, not a missing field", () => {
+  assert.throws(
+    () => withDefaults({ default: { image: { node: "26" }, install: [] } } as never),
+    /loaded as CommonJS/,
+  );
 });
 
 test("the Dockerfile builds on Python with Node copied in when image.python is set", async () => {

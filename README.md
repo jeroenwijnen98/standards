@@ -119,13 +119,14 @@ export default {
 ```
 
 The repo needs `@ai-hero/sandcastle` and `zod` as dependencies, and
-`"sandcastle": "npx tsx .sandcastle/main.mts"` in its scripts. A CommonJS repo also
-needs `.sandcastle/package.json` with `{"type": "module"}`, or the runner gets
-`{ default: config }`.
+`"sandcastle": "npx tsx .sandcastle/main.mts"` in its scripts.
 
 `npx sandcastle-setup sync` writes `Dockerfile` and `.env.example` from
-`config.ts` and adds missing `.gitignore` lines; commit them, since
-`sandcastle docker build-image` and the nightly run read them from disk. Run it
+`config.ts`, writes `package.json` with `{"type": "module"}` (without it, tsx
+loads `config.ts` as CommonJS in a repo whose own `package.json` is not ESM, and
+the runner gets `{ default: config }`), and adds missing `.gitignore` lines;
+commit them, since `sandcastle docker build-image` and the nightly run read them
+from disk. Run it
 after changing `config.ts` and after bumping this package. `sandcastle-setup
 check` exits 1 when they are stale, the runner warns, and `npm run status` lists
 it. `sandcastle-setup prompts <dir>` writes the composed prompts to read them;
