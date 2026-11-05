@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# mini-ui <app> <command> [args]: real clicks, keys and screenshots in a macOS
+# app on the Mac mini. On the mini it launches MiniUI.app; anywhere else it
+# forwards over ssh and copies screenshots back. Commands: README.md.
+set -euo pipefail
+APP="$HOME/Applications/MiniUI.app"
+HOST="${MINI_UI_HOST:-mini}"
+shot=0
+[[ ${2:-} == shot || ${2:-} == screen ]] && [[ -n ${3:-} ]] && shot=1
+
+if [[ ! -d $APP ]]; then
+  if ((shot)); then
+    remote="/tmp/mini-ui-$$.png"
+    code=0
+    ssh "$HOST" "mini-ui $(printf '%q ' "$1" "$2" "$remote")" || code=$?
+    if ((code == 0)); then
+      scp -q "$HOST:$remote" "$3"
+      ssh "$HOST" rm -f "$remote"
+      echo "copied to $3"
+    fi
+    exit "$code"
+  fi
+  exec ssh "$HOST" "mini-ui $(printf '%q ' "$@")"
+fi
+
+log=$(mktemp -t mini-ui)
+trap 'rm -f "$log"' EXIT
+args=("$@")
+# The app runs with cwd /, so a relative screenshot path is made absolute here.
+((shot)) && [[ $3 != /* ]] && args[2]="$PWD/$3"
+open -W -n --stdout "$log" --stderr "$log" "$APP" --args "${args[@]}"
+grep -v '^exit [0-9]*$' "$log" || true
+code=$(sed -n 's/^exit \([0-9]*\)$/\1/p' "$log" | tail -1)
+exit "${code:-1}"

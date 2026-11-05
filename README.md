@@ -23,6 +23,7 @@ npm i -D github:jeroenwijnen98/standards#v0.4.4
 | `tsconfig/node.json` | base + `nodenext`, for a server or script Node runs directly. |
 | `tsconfig/bundler.json` | base + `bundler` resolution and the DOM, for an esbuild-built browser app. |
 | `.github/workflows/node-test.yml` | Reusable CI job: `npm ci`, `npm test`. |
+| `mini-ui/` | The `mini-ui` command: real clicks, keys and screenshots in a native macOS app on the Mac mini, over ssh. `docs/ui-testing.md` says when to use it rather than Playwright. |
 | `sandcastle/` | The Sandcastle loop every repo runs (plan → implement + review → merge), its prompt templates, and the `sandcastle-setup` command that writes a repo's Dockerfile. See below. |
 
 ## Using it in a repo
