@@ -1,6 +1,6 @@
 {
   "name": "@jeroenwijnen98/standards",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -9,6 +9,10 @@
     "./sandcastle": {
       "types": "./sandcastle/index.d.ts",
       "default": "./sandcastle/index.js"
+    },
+    "./pwa": {
+      "types": "./pwa/index.d.ts",
+      "default": "./pwa/index.js"
     }
   },
   "peerDependencies": {
@@ -30,9 +34,10 @@
     "typescript": "^7.0.2"
   },
   "bin": {
-    "comment-width": "comment-width/cli.js",
     "checked-tree": "hooks/checked-tree",
+    "comment-width": "comment-width/cli.js",
     "flake-check": "flake-check/cli.js",
+    "pwa-check": "pwa/cli.js",
     "sandcastle-setup": "sandcastle/cli.js"
   },
   "peerDependenciesMeta": {

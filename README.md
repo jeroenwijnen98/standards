@@ -6,7 +6,7 @@ and adds its own rules on top. A rule added here reaches a repo when it bumps
 the tag.
 
 ```
-npm i -D github:jeroenwijnen98/standards#v0.4.4
+npm i -D github:jeroenwijnen98/standards#v0.5.0
 ```
 
 ## What's here
@@ -24,6 +24,7 @@ npm i -D github:jeroenwijnen98/standards#v0.4.4
 | `tsconfig/bundler.json` | base + `bundler` resolution and the DOM, for an esbuild-built browser app. |
 | `.github/workflows/node-test.yml` | Reusable CI job: `npm ci`, `npm test`. |
 | `mini-ui/` | The `mini-ui` command: real clicks, keys and screenshots in a native macOS app on the Mac mini, over ssh. `docs/ui-testing.md` says when to use it rather than Playwright. |
+| `pwa/` | What the Cloudflare-hosted PWAs (grocer, stronger, stillness) share about Access, pairing and the service worker, and the `pwa-check` command. See below. |
 | `sandcastle/` | The Sandcastle loop every repo runs (plan → implement + review → merge), its prompt templates, and the `sandcastle-setup` command that writes a repo's Dockerfile. See below. |
 
 ## Using it in a repo
@@ -88,6 +89,39 @@ on: [push, pull_request]
 jobs:
   test:
     uses: jeroenwijnen98/standards/.github/workflows/node-test.yml@<commit>
+```
+
+## Cloudflare PWAs
+
+One Worker serves the shell, `/pair` and `/api/*`; Cloudflare Access (OTP)
+guards `/pair` **only**; `/api/*` checks the secret pairing handed over.
+Whole-site Access looks fine while a session lasts. Once it expires, `/sw.js`
+answers with a redirect to the login, the browser refuses a redirected service
+worker, and the device stays on its old build with no "New version" bar. A page
+the service worker answers from the cache never reaches Access, so nothing
+prompts a login either.
+
+`@jeroenwijnen98/standards/pwa` holds each rule an app got wrong on its own:
+
+| Export | Where | What |
+|---|---|---|
+| `cachedFor`, `networkOnly`, `shellPath` | service worker | Pages get the shell; `/api/*`, `/pair` and `/cdn-cgi/*` (Access's login callback sets its cookie there) go to the network. |
+| `fetchPairing`, `LoginNeededError` | app | `/pair` with `redirect: 'manual'`: Access's redirect reads as "log in", not as a CORS failure. |
+| `cameBackFromLogin`, `loginReturnPath` | app | On `LoginNeededError` the app opens `/pair` as a page; after the login the Worker sends it to `/?login`, and the app pairs. |
+| `pairPageRedirect` | Worker | `/pair` asked for as a page (`Accept: text/html`) answers 303 to `/?login`, never the secret. |
+
+`pwa-check <origin>` asks what the deployed app answers someone not logged in:
+`/` and `/sw.js` 200, `/pair` a redirect to `*.cloudflareaccess.com`,
+`/api/*` 401. Access lives in the dashboard, so no test of the app sees it; the
+deploy workflow runs this after `npm run deploy`:
+
+```json
+"check:live": "pwa-check https://grocer.j-wijnen.workers.dev"
+```
+
+```yaml
+      - run: npm run deploy
+      - run: npm run check:live
 ```
 
 ## Sandcastle
